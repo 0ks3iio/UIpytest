@@ -4,7 +4,6 @@ import os
 import pytest
 from py.xml import html
 from selenium import webdriver
-
 from config import RunConfig
 from utils.readconfig import ReadIni
 
@@ -12,6 +11,21 @@ from utils.readconfig import ReadIni
 # 项目目录配置
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPORT_DIR = BASE_DIR + "/test_report/"
+
+
+def pytest_configure(config):
+    # 删除Java_Home
+    config._metadata.pop("JAVA_HOME")
+    config._metadata.pop("Packages")
+    config._metadata.pop("Platform")
+    config._metadata.pop("Plugins")
+    config._metadata.pop("Python")
+    config._metadata['接口地址'] = 'https://www.XXXX'
+    config._metadata['项目名称'] = '自动化测试学习中心'
+
+@pytest.mark.optionalhook
+def pytest_html_results_summary(prefix):
+    prefix.extend([html.p("测试人员: wjw")])
 
 # 定义基本测试环境地址
 @pytest.fixture(scope='function')
@@ -56,6 +70,8 @@ def pytest_runtest_makereport(item):
                        'onclick="window.open(this.src)" align="right"/></div>' % img_path
                 extra.append(pytest_html.extras.html(html))
         report.extra = extra
+        # report.description = str(item.function.__doc__)
+        report.nodeid = report.nodeid.encode("utf-8").decode("unicode_escape")  # 解决乱码
 
 
 def description_html(desc):

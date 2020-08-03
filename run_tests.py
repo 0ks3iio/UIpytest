@@ -6,6 +6,7 @@ import pytest
 import click
 from conftest import REPORT_DIR
 from config import RunConfig
+from logs.log import Log
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -18,23 +19,32 @@ logger = logging.getLogger(__name__)
   > python run_tests.py -m debug  (调试模式)
 '''
 
-
-def init_env(new_report):
-    """
-    初始化测试报告目录
-    """
-    os.mkdir(new_report)
-    os.mkdir(new_report + "/image")
-
-
 @click.command()
 @click.option('-m', default=None, help='输入运行模式：run 或 debug.')
 def run(m):
     if m is None or m == "run":
-        logger.info("回归模式，开始执行✈✈！")
-        now_time = time.strftime("%Y_%m_%d_%H_%M_%S")
-        RunConfig.NEW_REPORT = os.path.join(REPORT_DIR, now_time)
-        init_env(RunConfig.NEW_REPORT)
+        try:
+            logger.info("回归模式，开始执行✈✈！")
+            # now_time = time.strftime("%Y_%m_%d_%H_%M_%S")
+            now_time = time.strftime("%Y_%m_%d")
+            RunConfig.NEW_REPORT = os.path.join(REPORT_DIR, now_time)
+            if not os.path.exists(RunConfig.NEW_REPORT):
+                os.makedirs(RunConfig.NEW_REPORT)
+                print("report文件新建成功：%s" % RunConfig.NEW_REPORT)
+            else:
+                print("report文件已存在！！！")
+        except BaseException as msg:
+            Log.getLog(RunConfig.NEW_REPORT).error("%s : 新建report文件失败" % msg)
+
+        try:
+            if not os.path.exists(RunConfig.NEW_REPORT + "/image"):
+                os.mkdir(RunConfig.NEW_REPORT + "/image")
+                print("image文件新建成功：%s" % RunConfig.NEW_REPORT)
+            else:
+                print("image文件已存在！！！")
+        except BaseException as msg:
+            Log.getLog(RunConfig.NEW_REPORT).error("%s : 新建image文件失败" % msg)
+
         html_report = os.path.join(RunConfig.NEW_REPORT, "report.html")
         xml_report = os.path.join(RunConfig.NEW_REPORT, "junit-xml.xml")
         pytest.main(["-s", "-v", RunConfig.cases_path,
@@ -43,7 +53,7 @@ def run(m):
                      "--self-contained-html",
                      "--maxfail", RunConfig.max_fail,
                      "--reruns", RunConfig.rerun])
-        logger.info("运行结束，生成测试报告♥❤！")
+        Log.getLog(RunConfig.NEW_REPORT).info("运行结束，生成测试报告♥❤！")
     elif m == "debug":
         print("debug模式，开始执行！")
         pytest.main(["-v", "-s", RunConfig.cases_path])
