@@ -1,5 +1,10 @@
 # 定义基本测试环境
+import base64
 import os
+import smtplib
+import time
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 import pytest
 from py.xml import html
@@ -64,13 +69,14 @@ def pytest_runtest_makereport(item):
             else:
                 case_name = case_path
             capture_screenshots(case_name)
-            img_path = "image/" + case_name.split("/")[-1]
+            file_name = case_name.split("/")[-1]
+            img_path = os.path.join(RunConfig.NEW_REPORT, "image", file_name)
+            print(img_path)
             if img_path:
                 html = '<div><img src="%s" alt="screenshot" style="width:304px;height:228px;" ' \
                        'onclick="window.open(this.src)" align="right"/></div>' % img_path
                 extra.append(pytest_html.extras.html(html))
         report.extra = extra
-        # report.description = str(item.function.__doc__)
         report.nodeid = report.nodeid.encode("utf-8").decode("unicode_escape")  # 解决乱码
 
 
@@ -139,10 +145,10 @@ def browser():
     RunConfig.driver = driver
     return driver
 
-
 # 关闭浏览器
 @pytest.fixture(scope="session", autouse=True)
 def browser_close(browser):
     yield driver
     driver.quit()
     print("test end!")
+

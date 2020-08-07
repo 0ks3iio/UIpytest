@@ -21,3 +21,15 @@ class RunConfig:
 
     # 报告路径（不需要修改）
     NEW_REPORT = None
+
+    username = '545322587@qq.com'
+
+    password = 'pygyryvlavjjbgba'
+
+    recv = 'wangjingwen@vipkid.com.cn'
+
+    title = '报告'
+
+    content = 'UI自动化测试报告'
+
+

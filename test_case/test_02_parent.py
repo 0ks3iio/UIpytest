@@ -25,7 +25,7 @@ class TestParent:
         for handle in all_handles:
             if handle != now_handle:
                 browser.close()
-                browser.switch_to_window(handle)
+                browser.switch_to.window(handle)
         sleep(8)
 
 

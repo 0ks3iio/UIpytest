@@ -21,6 +21,7 @@ class TestLogin:
         page = LoginPage(browser)
         page.username.send_keys("14411000023")
 
+
     def test_login_password(self, browser):
         """
         检查点：

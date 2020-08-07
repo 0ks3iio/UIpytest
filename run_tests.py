@@ -7,6 +7,8 @@ import click
 from conftest import REPORT_DIR
 from config import RunConfig
 from logs.log import Log
+from utils.postemail import SendMail
+
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -54,6 +56,22 @@ def run(m):
                      "--maxfail", RunConfig.max_fail,
                      "--reruns", RunConfig.rerun])
         Log.getLog(RunConfig.NEW_REPORT).info("运行结束，生成测试报告♥❤！")
+        try:
+            m = SendMail(
+                # 遗留问题：下面注释的三行读出来是个tuple
+                username=RunConfig.username,
+                passwd=RunConfig.password,
+                recv=RunConfig.recv,
+                title=RunConfig.title,
+                content=RunConfig.content,
+                # # recv=['448112172@qq.com','yujingfeng@didiglobal.com', 'zhanglili8@100tal.com'],
+                file=os.path.dirname(os.getcwd()) + '/UIpytest/test_report/' + time.strftime("%Y_%m_%d") + '/report.html',
+                ssl=True
+            )
+            m.send_mail()
+        except BaseException as msg:
+            Log.getLog(RunConfig.NEW_REPORT).info("%s : report报告发送失败" % msg)
+
     elif m == "debug":
         print("debug模式，开始执行！")
         pytest.main(["-v", "-s", RunConfig.cases_path])
@@ -62,3 +80,7 @@ def run(m):
 
 if __name__ == '__main__':
     run()
+
+
+
+
